@@ -7,6 +7,11 @@ Adafruit_MPU6050 mpu;
 float x_as = 0;
 float y_as = 0;
 float z_as = 0;
+float tempx_as = 0;
+float tempy_as = 0;
+float tempz_as = 0;
+
+int teller = 100000;
 
 
 void setup(void) {
@@ -37,16 +42,40 @@ void loop() {
 	/* Get new sensor events with the readings */
 	sensors_event_t a, g, temp;
 	mpu.getEvent(&a, &g, &temp);
+	if (teller > 60000){
+		if (tempx_as != round(x_as/1000)){
+			x_as = tempx_as;
+		}
+		if (tempy_as != round(y_as/1000)){
+			y_as = tempy_as;
+		}
+		if (tempz_as != round(z_as/1000)){
+			z_as = tempz_as;
+		}
+		tempx_as = round(x_as/1000);
+		tempy_as = round(y_as/1000);
+		tempz_as = round(z_as/1000);
+		teller = 0;
+	}
 
-	// speed
-	// Serial.print("Acceleration X: ");
-	// Serial.print(a.acceleration.x);
-	// Serial.print(", Y: ");
-	// Serial.print(a.acceleration.y);
-	// Serial.print(", Z: ");
-	// Serial.print(a.acceleration.z);
-	// Serial.println(" m/s^2");
-
+	if (round(x_as/1000) < 0){
+		x_as = 359000;
+	}
+	if (round(x_as/1000) > 359){
+		x_as = 0;
+	}
+	if (round(y_as/1000) < 0){
+		y_as = 359000;
+	}
+	if (round(y_as/1000) > 359){
+		y_as = 0;
+	}
+	if (round(z_as/1000) < 0){
+		z_as = 359000;
+	}
+	if (round(z_as/1000) > 359){
+		z_as = 0;
+	}
 	// rotation
 	// x: + 0.12 y: + 0.25 z: + 0.055
 
@@ -56,11 +85,6 @@ void loop() {
 	y_as += round((g.gyro.y + 0.025)*100)*2.195121951219512;
 	z_as += round((g.gyro.z + 0.055)*100)*2.195121951219512;
 
-	// x_as = round(x_as);
-	// y_as = round(y_as);
-	// z_as = round(z_as);
-
-
 	Serial.print("Rotation X: ");
 	Serial.print(round(x_as/1000));
 	Serial.print(", Y: ");
@@ -68,6 +92,14 @@ void loop() {
 	Serial.print(", Z: ");
 	Serial.print(round(z_as/1000));
 	Serial.println(" grad");
+	// Serial.print(" Acceleration X: ");
+	// Serial.print(a.acceleration.x);
+	// Serial.print(", Y: ");
+	// Serial.print(a.acceleration.y);
+	// Serial.print(", Z: ");
+	// Serial.print(a.acceleration.z);
+	// Serial.println(" m/s^2");
+	
 
 	// temperature
 	// Serial.print("Temperature: ");
@@ -75,6 +107,7 @@ void loop() {
 	// Serial.println(" degC");
 
 	delay(0.1);
+	teller++;
 }
 
 // #include <Adafruit_MPU6050.h>
